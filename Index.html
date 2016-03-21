@@ -6,16 +6,42 @@
             <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
 
         <style>
+            h1 {
+                color: black;
+                text-align: left;
+                font-family: helvetica, sans-serif;
+                font-weight: 100;
+            }
+            #intro {
+                position: absolute;
+                left: 20px;
+                //width: 700px;
+                font-family: helvetica, sans-serif;
+                font-weight: 100;
+
+                /*margin: 25px auto;*/
+        }
+        #summary {
+            position: absolute;
+            left: 20px;
+            width: 700px;
+            font-family: helvetica, sans-serif;
+            font-weight: 100;
+            
+            /*margin: 25px auto;*/
+        }
+
+
         </style>
         <script type="text/javascript">
             function draw(data) {
                 //debugger;
-                
+                "use strict";
                 var svg = dimple.newSvg("#chartContainer", 1300, 1400);
                 
                 //Filter out data for the Carrier we want to display
-                data = dimple.filterData(data, "UniqueCarrier", ["WN", "AA", "OO", "B6",
-                                                                 "MQ", "US", "DL", "UA",  "AS", "FL"
+                data = dimple.filterData(data, "UniqueCarrier", ["WN", "B6",  "OO", "NK",
+                                                                 "MQ", "AS", "UA"
                                                            ]);
                                                            
                 // Now filter for the Years
@@ -28,23 +54,30 @@
                 var indicatorColor = indicator.defaultColors[2];
                                                            
                 // The frame duration for the animation in milliseconds
-                var frame = 5000;
+                var frame = 4000;
                 var pauseState = false;
                 var firstTick = true;
-                                                           
+                var tickcount = 1;
+
+
                 // Place the indicator bar chart to the left
-                indicator.setBounds(75, 150, 50, 150);
+                indicator.setBounds(75, 150, 50, 240);
                                                            
                 // Add dates along the y axis
                 var y = indicator.addCategoryAxis("y", "Year");
                 y.addOrderRule("Year", true);
                                                            
                 // add a measure for the bar size and hide the axis
-                var x = indicator.addMeasureAxis("x", "TotalFlights");
+                var x = indicator.addMeasureAxis("x", "Month");
                 x.hidden = true;
 
                 // Add the bars to the indicator and add event handlers
                 var s = indicator.addSeries(null, dimple.plot.bar);
+                s.getTooltipText = function (e) {
+                    return [
+                            "Year: " + e.cy
+                            ];
+                };
                 s.addEventHandler("click", onClick);
                 // Draw the side chart
                 indicator.draw();
@@ -58,6 +91,7 @@
                 // Move the y axis text inside the plot area
                 y.shapes.selectAll("text")
                 .style("text-anchor", "start")
+                .style("font-family", "helvetica, sans-serif")
                 .style("font-size", "11px")
                 .attr("transform", "translate(18, 0.5)");
 
@@ -65,18 +99,19 @@
                 // object to split it onto 2 lines.  This technique works with any
                 // number of lines, it isn't dimple specific.
                 svg.selectAll("title_text")
-                    .data(["Click bar to select",
-                       "and pause. Click again",
-                       "to resume animation"])
+                    .data(["The Animation will run through once.",
+                       "You may then click any year to view",
+                       "results for that year."])
                     .enter()
                     .append("text")
                     .attr("x", 60)
-                    .attr("y", function (d, i) { return 100 + i * 12; })
+                    .attr("y", function (d, i) { return 120 + i * 12; })
                     .style("font-family", "sans-serif")
-                    .style("font-size", "10px")
+                    .style("font-family", "helvetica, sans-serif")
+                    .style("font-size", "12px")
                     .style("color", "Black")
                     .text(function (d) { return d; });
-       
+                    
                 // Manually set the bar colors
                 s.shapes
                     .attr("rx", 10)
@@ -90,24 +125,30 @@
                 //Now draw the chart for Air Carrier performance by Month
        
                 var myChart = new dimple.chart(svg, data);
-                myChart.setBounds(300, 50, 480, 330);
+                myChart.setBounds(300, 150, 550, 400);
                 svg.append("text")
                 .attr("x", myChart._xPixels() + myChart._widthPixels() / 2)
                 .attr("y", myChart._yPixels() - 20)
                 .style("text-anchor", "middle")
-                .style("font-family", "sans-serif")
+                .style("font-family", "helvetica, sans-serif")
+                .style("font-size", "18px")
                 .style("font-weight", "bold")
-                .text("Percentage Time On Ground for Aircrafts by Airline");
-                yaxis = myChart.addCategoryAxis("y", "PctTimeOnGround");
-                xaxis = myChart.addCategoryAxis("x", "Month");
-                yaxis.title = "Percentage Time On Ground"
-                xaxis.title = "Month"
+                .text("Time Spent On Ground for Aircrafts by Airline");
+                var yaxis = myChart.addMeasureAxis("y", "PctTimeOnGround");
+                var xaxis = myChart.addCategoryAxis("x", "Month");
+                xaxis.addOrderRule(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct", "Nov","Dec"]);
+                yaxis.title = "Percentage Time On Ground";
+                xaxis.title = "Month";
+                yaxis.showGridlines = false;
+                xaxis.showGridlines = false;
+                yaxis.overrideMax = 80;
+                yaxis.overrideMin = 25;
                 //y.addOrderRule("Date");
                 //myChart.addCategoryAxis("z", "TotalFlights");
                 myChart.addMeasureAxis("z", "TotalFlights");
-                var myPlot = myChart.addSeries(["Year", "TotalDistance", "CarrierName"], dimple.plot.bubble);
+                var myPlot = myChart.addSeries(["Year", "TotalAircrafts", "TotalDistance", "CarrierName"], dimple.plot.bubble);
                 //myLegend.verticalPadding = 10;
-                var myLegend = myChart.addLegend(900, 70, 100, 200, "Right");
+                var myLegend = myChart.addLegend(1000, 150, 100, 240, "Right");
                 myChart.draw();
                 
                 // This is a critical step.  By doing this we orphan the legend. This
@@ -124,10 +165,10 @@
                     .data(["Click legend to","show/hide carriers:"])
                     .enter()
                     .append("text")
-                    .attr("x", 850)
-                    .attr("y", function (d, i) { return 50 + i * 14; })
-                    .style("font-family", "sans-serif")
-                    .style("font-size", "10px")
+                    .attr("x", 950)
+                    .attr("y", function (d, i) { return 120 + i * 12; })
+                    .style("font-family", "helvetica, sans-serif")
+                    .style("font-size", "12px")
                     .style("color", "Black")
                     .text(function (d) { return d; });
                 
@@ -150,10 +191,10 @@
                     });
                     // Hide the shape or show it
                     if (hide) {
-                        d3.select(this).style("opacity", 0.2);
+                        d3.select(this).style("opacity", 0.1);
                     } else {
                         newFilters.push(e.aggField.slice(-1)[0]);
-                        d3.select(this).style("opacity", 0.8);
+                        d3.select(this).style("opacity", 1.0);
                     }
                     // Update the filters
                     filterValues = newFilters;
@@ -161,9 +202,9 @@
                     myChart.data = dimple.filterData(data, "CarrierName", filterValues);
                     // Passing a duration parameter makes the chart animate. Without
                     // it there is no transition
-                    myChart.draw(800);
+                    myChart.draw();
                     if (pauseState === true) {
-                    story.pauseAnimation()
+                        story.pauseAnimation()
                     }
 
                 
@@ -185,19 +226,8 @@
                 story.storyLabel.remove();
                 // On click of the side chart
                 function onClick(e) {
-                    // Pause the animation
-                    pauseState = true;
-                    story.pauseAnimation();
-                    // If it is already selected resume the animation
-                    // otherwise pause and move to the selected Year
-                    if (e.yValue === story.getFrameValue()) {
-                        pauseState = false;
-                        story.startAnimation();
-                    } else {
-                        pauseState = true;
-                        story.goToFrame(e.yValue);
-                        story.pauseAnimation();
-                    }
+                    story.goToFrame(e.yValue);
+                    story.stopAnimation();
                 }
                 // On tick of the main charts storyboard
                 function onTick(e) {
@@ -210,40 +240,41 @@
                                return (d.y === e ?
                                        indicatorColor.fill : defaultColor.fill)
                                })
-                               .style("stroke", function (d) {
-                                      return (d.y === e ?
-                                              indicatorColor.stroke : defaultColor.stroke)
-                                      });
+                        .style("stroke", function (d) {
+                                return (d.y === e ?
+                                        indicatorColor.stroke : defaultColor.stroke)
+                        });
+                        tickcount += 1;
+                    }
+                    if (tickcount > 8) {
+                        story.stopAnimation();
                     }
                     firstTick = false;
                 }
                 function onHover(e) {
-                    dimple._showPointTooltip(e, this, lines, avg);
-                    lines.draw();
-                    story.pauseAnimation();
+                    dimple._showPointTooltip(e, this, myChart, avg);
+                    myChart.draw();
+                    //story.pauseAnimation();
                 };
-                function onLeave(e) {
-                    if (pauseState === false) {
-                        story.startAnimation();
-                    } else {
-                        lines.draw();
-                        story.pauseAnimation();
-                    }
-                };
-
 
 
             };
         </script>
     </head>
     <body>
+        <h1>What Makes Airlines Efficient?</h1>
+        <div id="intro">
+            <p>
+            They simply keep their aircrafts in the air for more time than other airlines. SouthWest Airlines is more profitable than most US carriers. The following visualization shows why.
+            </P>
+        </div>
         <div id="chartContainer">
         <script type="text/javascript">
             /*
              Use D3 (not dimple.js) to load the CSV file
              and pass the contents of it to the draw function
              */
-        d3.csv("AircraftSummary.csv", draw);
+        d3.csv("data/AircraftSummary.csv", draw);
             </script>
         </div>
     </body>
