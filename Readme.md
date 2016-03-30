@@ -71,6 +71,11 @@ Instead of mapping the Total Aircrafts to the Total Flights, it would be better 
 ######Response to feedback4:
 I changed my chart to plot the average time spent in air per day for each carrier against the total flights per year for that carrier. I changed the bubble to size based on the total aircrafts owned by the carrier that year. This chart clearly defines my central premise that Southwest airlines is more efficient because you can see that even though American Airlines has far more aircrafts, the number or hours spent in air (and number of flights) is lower than Southwest Airlines. It also shows that although JetBlue is has far smaller numbers, in terms of efficiency, they are still better than the larger airlines.
 
+###### Feedback 5 from Carl Ward:
+I think its pretty good. I really like the idea, the only other things I would suggest is to emphasize the important elements of the visualization. For instance maybe make the other airlines have more transparency than Southwest. 
+
+######Response to feedback5:
+I changed the opacity for Southwest Airlines to 1.0 and for the rest of the airlines to 0.6. This makes Southwest Airlines stand out.
 
 #Resources
 * [http://www.d3js.org/](http://www.d3js.org/)

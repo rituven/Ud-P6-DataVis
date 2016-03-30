@@ -43,11 +43,7 @@
                 data = dimple.filterData(data, "UniqueCarrier", ["AA", "DL", "WN",
                                                                  "AS", "B6"]);
                  data = dimple.filterData(data, "cancelled", ["0"]);
-                                                           
-                // Now filter for the Months
-                //data = dimple.filterData(data, "Month", ["Jan", "Apr",  "Jul", "Oct"]);
-
-
+                 
                 // Create the indicator chart on the left of the main chart
                 var indicator = new dimple.chart(svg, data);
                                                            
@@ -56,7 +52,7 @@
                 var indicatorColor = indicator.defaultColors[2];
                                                            
                 // The frame duration for the animation in milliseconds
-                var frame = 3000;
+                var frame = 0;
                 var pauseState = false;
                 var firstTick = true;
                 var tickcount = 1;
@@ -67,7 +63,6 @@
                                                            
                 // Add dates along the y axis
                 var y = indicator.addCategoryAxis("y", "Year");
-                //y.addOrderRule(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct", "Nov","Dec"]);
                 y.addOrderRule("Year", true);
                 
                 // add a measure for the bar size and hide the axis
@@ -102,8 +97,7 @@
                 // object to split it onto 2 lines.  This technique works with any
                 // number of lines, it isn't dimple specific.
                 svg.selectAll("title_text")
-                    .data(["The Animation will run through once.",
-                       "You may then click any year to view",
+                    .data(["You may click any year to view",
                        "results for that year."])
                     .enter()
                     .append("text")
@@ -137,7 +131,7 @@
                                                             indicatorColor.stroke : defaultColor.stroke) })
                     .style("opacity", 0.4);
                     
-                //Now draw the chart for Air Carrier performance by Month
+                //Now draw the chart for Air Carrier performance
        
                 var myChart = new dimple.chart(svg, data);
                 myChart.setBounds(300, 150, 650, 400);
@@ -177,6 +171,19 @@
                             "Total Air Time Per Craft: " + e.aggField[4]
                             ];
                 };
+                // Get a unique list of Owner values to use when filtering
+                var filterValues = dimple.getUniqueValues(data, "CarrierName");
+
+                filterValues.forEach(function (f) {
+                                       //legendColor = myChart.getColor(f);
+                                       //        console.log(f + ":" + legendColor.fill);
+                                       if (f === "Southwest Airlines Co.") {
+                                            myChart.getColor(f).opacity = 1.0;
+                                     } else {
+                                            myChart.getColor(f).opacity = 0.6;
+                                     }
+                });
+
 
                 //myLegend.verticalPadding = 10;
                 var myLegend = myChart.addLegend(1000, 150, 100, 240, "Right");
@@ -204,8 +211,6 @@
                     .style("color", "Black")
                     .text(function (d) { return d; });
                 
-                // Get a unique list of Owner values to use when filtering
-                var filterValues = dimple.getUniqueValues(data, "CarrierName");
                 // Get all the rectangles from our now orphaned legend
                 myLegend.shapes.selectAll("rect")
                 // Add a click event to each rectangle
@@ -244,11 +249,10 @@
                 // Add a storyboard to the main chart and set the tick event
                 var story = myChart.setStoryboard("Year", onTick);
                 // Change the frame duration
-                story.frameDuration = 0;
+                story.frameDuration = frame;
                 // Order the storyboard by date and set autoplay to false
                 story.addOrderRule("Year");
-                story.delay = 1000;
-                //myStoryboard.autoplay = false;
+
                 // Draw the line chart
                 myChart.draw();
                 // Orphan the legends as they are consistent but by default they
